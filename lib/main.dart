@@ -42,6 +42,21 @@ class _HomeState extends State<Home> {
     });
   }
 
+  Future<Null> _refresh() async {
+    await Future.delayed(Duration(milliseconds: 400));
+    setState(() {
+      _toDoList.sort((card1, card2) {
+        if (card1["ok"] && !card2["ok"])
+          return 1;
+        else if (!card1["ok"] && card2["ok"])
+          return -1;
+        else
+          return 0;
+      });
+      _saveData();
+    });
+  }
+
   final _textFielController = TextEditingController();
 
   @override
@@ -78,10 +93,13 @@ class _HomeState extends State<Home> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-                padding: EdgeInsets.only(top: 10.0),
-                itemCount: _toDoList.length,
-                itemBuilder: buildItem),
+            child: RefreshIndicator(
+              onRefresh: _refresh,
+              child: ListView.builder(
+                  padding: EdgeInsets.only(top: 10.0),
+                  itemCount: _toDoList.length,
+                  itemBuilder: buildItem),
+            ),
           )
         ],
       ),
@@ -123,16 +141,18 @@ class _HomeState extends State<Home> {
 
           final snack = SnackBar(
             content: Text("Tarefa '${_lastRemoved["title"]}' removida!"),
-            action: SnackBarAction(label: "Desfazer", 
-            onPressed: (){
-              setState(() {
-              _toDoList.insert(_lastRemovedPos, _lastRemoved);
-              _saveData();
-              });
-            }),
+            action: SnackBarAction(
+                label: "Desfazer",
+                onPressed: () {
+                  setState(() {
+                    _toDoList.insert(_lastRemovedPos, _lastRemoved);
+                    _saveData();
+                  });
+                }),
             duration: Duration(seconds: 2),
-            );
-            Scaffold.of(context).showSnackBar(snack); 
+          );
+          Scaffold.of(context).removeCurrentSnackBar();
+          Scaffold.of(context).showSnackBar(snack);
         });
       },
     );
