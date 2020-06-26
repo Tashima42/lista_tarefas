@@ -18,6 +18,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   List _toDoList = [];
+
   Map<String, dynamic> _lastRemoved;
   int _lastRemovedPos;
 
@@ -40,6 +41,11 @@ class _HomeState extends State<Home> {
       _toDoList.add(newToDo);
       _saveData();
     });
+  }
+
+  Color _setTextColor(bool ok){
+    if(ok) return Colors.grey;
+    else return Colors.black;
   }
 
   Future<Null> _refresh() async {
@@ -118,13 +124,11 @@ class _HomeState extends State<Home> {
       ),
       direction: DismissDirection.startToEnd,
       child: CheckboxListTile(
-        title: Text(_toDoList[index]["title"]),
-        value: _toDoList[index]["ok"],
-        secondary: CircleAvatar(
-          child: Icon(
-            _toDoList[index]["ok"] ? Icons.check : Icons.error,
-          ),
+        title: Text(
+          _toDoList[index]["title"],
+          style: TextStyle(color: _setTextColor(_toDoList[index]["ok"])),
         ),
+        value: _toDoList[index]["ok"],
         onChanged: (check) {
           setState(() {
             _toDoList[index]["ok"] = check;
